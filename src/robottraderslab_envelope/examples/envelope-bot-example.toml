@@ -1,0 +1,34 @@
+[strategy]
+strategy_class = "envelope"
+
+[backtest]
+initial_balance = { USDT = 1000.0 }
+maker_fee_rate = 0.0002
+taker_fee_rate = 0.0005
+start_date = "2025-09-01"
+end_date = "2026-09-01"
+
+[backtest.ohlcv_provider]
+ohlcv_provider = "ccxt_bitget"
+
+[live.ohlcv_provider]
+ohlcv_provider = "bitget"
+
+[live.trading_account]
+exchange = "bitget"
+demo_trading = true
+secret_name = "envelope-example"
+
+[report]
+reference_symbol = "SOL/USDT:USDT"
+
+[[strategy.profiles]]
+symbol = "SOL/USDT:USDT"
+timeframe = "4h"
+total_balance_ratio = 1.0
+leverage = 1.0
+margin_mode = "isolated"
+average_type = "DCM"
+average_period = 5
+envelopes = [0.07, 0.11, 0.15]
+stop_loss_pct = 0.25
