@@ -1,0 +1,34 @@
+[project]
+name = "robottraderslab-envelope"
+version = "0.1.0"
+description = "Envelope trading strategy plugin for the RobotTradersLab engine"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+license = "Apache-2.0"
+dependencies = [
+  "robottraderslab>=0.2.1",
+  "pandas>=3.0.0",
+  "numpy>=2.4.2",
+]
+
+[project.urls]
+Homepage = "https://robottraders.io/lab/envelope"
+Documentation = "https://robottraders.io/lab/docs/envelope.html"
+Repository = "https://github.com/RobotTraders/RobotTradersLab-Envelope"
+
+[project.entry-points."robot_traders_lab.strategies"]
+envelope ="robottraderslab_envelope:EnvelopeStrategy"
+
+[project.entry-points."robot_traders_lab.indicators"]
+envelope = "robottraderslab_envelope.chart_indicators:get_lightweight_chart_indicators"
+
+[project.entry-points."robot_traders_lab.examples"]
+envelope = "robottraderslab_envelope"
+
+[build-system]
+requires = ["uv_build>=0.10.4,<0.11.0"]
+build-backend = "uv_build"
+
+
+[tool.uv.build-backend]
+module-name = "robottraderslab_envelope"
