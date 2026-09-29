@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
-from robottraderslab_envelope.chart_indicators import get_lightweight_chart_indicators
 
 from robottraderslab.strategies import Candles, ChartLine
+from robottraderslab_envelope.chart_indicators import get_lightweight_chart_indicators
 
 CLOSES = np.array([100.0 + i * 2.0 for i in range(50)])
 CANDLES = Candles(

@@ -2,13 +2,6 @@ from unittest.mock import Mock
 
 import pandas as pd
 import pytest
-from robottraderslab_envelope.entry_order import (
-    EntryOrder,
-    LimitEntryOrder,
-    TriggerEntryOrder,
-)
-from robottraderslab_envelope.profile_config import AverageType, ProfileConfig
-from robottraderslab_envelope.profile_snapshot import ProfileSnapshot
 
 from robottraderslab import Symbol
 from robottraderslab.strategies import (
@@ -24,6 +17,13 @@ from robottraderslab.strategies.futures import (
     MarginSettings,
     TotalBalanceRatio,
 )
+from robottraderslab_envelope.entry_order import (
+    EntryOrder,
+    LimitEntryOrder,
+    TriggerEntryOrder,
+)
+from robottraderslab_envelope.profile_config import AverageType, ProfileConfig
+from robottraderslab_envelope.profile_snapshot import ProfileSnapshot
 
 BTC = Symbol.create("BTC/USDT:USDT")
 TIMEFRAME = "1h"

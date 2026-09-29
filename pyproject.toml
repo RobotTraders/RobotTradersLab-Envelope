@@ -1,6 +1,6 @@
 [project]
 name = "robottraderslab-envelope"
-version = "0.1.0"
+version = "0.1.1"
 description = "Envelope trading strategy plugin for the RobotTradersLab engine"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
@@ -32,3 +32,55 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-name = "robottraderslab_envelope"
+
+[dependency-groups]
+dev = [
+  "bandit[toml]==1.9.4",
+  "mypy==1.20.0",
+  "pandas-stubs==3.0.0.260204",
+  "pytest==9.0.3",
+  "pytest-asyncio==1.3.0",
+  "pytest-cov==7.1.0",
+  "ruff==0.15.10",
+]
+
+[tool.coverage.run]
+omit = ["*/tests/*", "*/test_*.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+  "ignore:enable_cleanup_closed ignored because.*:DeprecationWarning:aiohttp.connector",
+]
+
+[tool.mypy]
+packages = ["robottraderslab_envelope"]
+follow_imports = "normal"
+python_version = "3.13"
+color_output = true
+show_error_codes = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+namespace_packages = true
+incremental = true
+cache_dir = ".mypy_cache"
+exclude = '^(build/|dist/|\.venv/|.*tests/)'
+
+[tool.bandit]
+skips = ["B101"]
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.ruff.lint]
+extend-select = ["I", "PT"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["robottraderslab"]

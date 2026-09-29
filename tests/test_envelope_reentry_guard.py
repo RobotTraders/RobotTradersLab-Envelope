@@ -3,10 +3,10 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 import pytest
-from robottraderslab_envelope.reentry_guard import ReentryGuard, ReentryState
 
 from robottraderslab import Symbol
 from robottraderslab.strategies import Execution, OHLCVs, OrderSide, PositionSide
+from robottraderslab_envelope.reentry_guard import ReentryGuard, ReentryState
 
 BTC = Symbol.create("BTC/USDT:USDT")
 ETH = Symbol.create("ETH/USDT:USDT")

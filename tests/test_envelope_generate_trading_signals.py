@@ -2,11 +2,11 @@ from collections.abc import Callable
 
 import pandas as pd
 import pytest
-from robottraderslab_envelope import EnvelopeStrategy
 
 from robottraderslab import Symbol
 from robottraderslab.exceptions import MissingOhlcvDataError
 from robottraderslab.strategies import OHLCVs, TradingMode
+from robottraderslab_envelope import EnvelopeStrategy
 
 BTC = Symbol.create("BTC/USDT:USDT")
 TIMEFRAME = "1d"

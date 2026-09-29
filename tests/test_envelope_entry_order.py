@@ -1,9 +1,9 @@
 from unittest.mock import Mock
 
 import pytest
-from robottraderslab_envelope.entry_order import LimitEntryOrder, TriggerEntryOrder
 
 from robottraderslab.strategies.futures import FuturesOrderBuilder
+from robottraderslab_envelope.entry_order import LimitEntryOrder, TriggerEntryOrder
 
 
 @pytest.fixture

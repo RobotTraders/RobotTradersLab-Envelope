@@ -1,10 +1,10 @@
 import pandas as pd
 import pytest
-from robottraderslab_envelope.envelope_indicator import compute_envelope
-from robottraderslab_envelope.profile_config import AverageType
 
 from robottraderslab.indicators import MAType
 from robottraderslab.strategies import PositionSide
+from robottraderslab_envelope.envelope_indicator import compute_envelope
+from robottraderslab_envelope.profile_config import AverageType
 
 LONG = PositionSide.LONG
 SHORT = PositionSide.SHORT
