@@ -5,7 +5,6 @@ from unittest.mock import Mock
 
 import pandas as pd
 import pytest
-from robottraderslab_envelope import EnvelopeStrategy
 
 from robottraderslab import Symbol
 from robottraderslab.exchanges import OrderType
@@ -37,6 +36,7 @@ from robottraderslab.strategies.futures import (
     UpdatePositionStopLossAction,
     UpdatePositionTakeProfitAction,
 )
+from robottraderslab_envelope import EnvelopeStrategy
 
 BTC = Symbol.create("BTC/USDT:USDT")
 ACCOUNT_NAME = "test"

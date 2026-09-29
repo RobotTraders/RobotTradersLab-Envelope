@@ -2,7 +2,6 @@ import asyncio
 from datetime import datetime
 
 import pandas as pd
-from robottraderslab_envelope import EnvelopeStrategy
 
 from robottraderslab import Symbol
 from robottraderslab.strategies import (
@@ -20,6 +19,7 @@ from robottraderslab.strategies.futures import (
     MarginMode,
     MarginSettings,
 )
+from robottraderslab_envelope import EnvelopeStrategy
 
 BTC = Symbol.create("BTC/USDT:USDT")
 ETH = Symbol.create("ETH/USDT:USDT")

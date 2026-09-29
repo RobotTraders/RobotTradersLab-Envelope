@@ -4,11 +4,11 @@ from collections.abc import Callable
 from typing import Any
 
 import pytest
-from robottraderslab_envelope import EnvelopeStrategy
 
 from robottraderslab import Symbol
 from robottraderslab.exceptions import StrategyCriticalError
 from robottraderslab.strategies import StrategyRequirements
+from robottraderslab_envelope import EnvelopeStrategy
 
 
 def _sized_profile(

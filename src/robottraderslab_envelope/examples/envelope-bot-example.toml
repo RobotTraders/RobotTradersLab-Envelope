@@ -15,8 +15,6 @@ ohlcv_provider = "ccxt_bitget"
 ohlcv_provider = "bitget"
 
 [live.trading_account]
-exchange = "bitget"
-demo_trading = true
 secret_name = "envelope-example"
 
 [report]

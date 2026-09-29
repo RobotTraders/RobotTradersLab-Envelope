@@ -1,7 +1,6 @@
 import re
 
 import pytest
-from robottraderslab_envelope.profile_config import AverageType, ProfileConfig
 
 from robottraderslab.exceptions import StrategyCriticalError
 from robottraderslab.strategies import PositionSide
@@ -9,6 +8,7 @@ from robottraderslab.strategies.futures import (
     MarginMode,
     TotalBalanceRatio,
 )
+from robottraderslab_envelope.profile_config import AverageType, ProfileConfig
 
 SYMBOL = "BTC/USDT:USDT"
 LONG = PositionSide.LONG

@@ -4,7 +4,6 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
-from robottraderslab_envelope import EnvelopeStrategy
 
 from robottraderslab.exchanges import FuturesExchangeProtocol
 from robottraderslab.strategies import Balance, TradingMode, TradingSystem
@@ -14,6 +13,7 @@ from robottraderslab.strategies.futures import (
     MarginMode,
     MarginSettings,
 )
+from robottraderslab_envelope import EnvelopeStrategy
 
 
 @pytest.fixture

@@ -5,8 +5,6 @@ from typing import Any
 
 import pandas as pd
 import pytest
-from robottraderslab_envelope import EnvelopeStrategy
-from robottraderslab_envelope.reentry_guard import ReentryGuard
 
 from robottraderslab import Symbol
 from robottraderslab.backtester.simulator import (
@@ -29,6 +27,8 @@ from robottraderslab.strategies.futures import (
     FuturesMarketOrderAction,
     FuturesOrderBatchAction,
 )
+from robottraderslab_envelope import EnvelopeStrategy
+from robottraderslab_envelope.reentry_guard import ReentryGuard
 
 BTC = Symbol.create("BTC/USDT:USDT")
 ETH = Symbol.create("ETH/USDT:USDT")
