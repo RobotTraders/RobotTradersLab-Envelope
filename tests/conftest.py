@@ -37,6 +37,11 @@ def mock_exchange() -> Mock:
     return exchange
 
 
+@pytest.fixture(params=["trigger", "limit"])
+def entry_order(request: pytest.FixtureRequest) -> str:
+    return request.param
+
+
 @pytest.fixture
 def make_strategy(
     mock_exchange: Mock,

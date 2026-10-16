@@ -150,6 +150,21 @@ class TestSetup:
         with pytest.raises(StrategyCriticalError, match="'trigger' or 'limit'"):
             make_strategy([profile], entry_order="stop")
 
+    def test_rungs_rest_as_triggers_by_default(self, make_strategy):
+        profile = {
+            "symbol": "BTC/USDT:USDT",
+            "timeframe": "1d",
+            "total_balance_ratio": 1.0,
+            "average_type": "SMA",
+            "average_period": 100,
+            "envelopes": [0.05],
+            "stop_loss_pct": 0.04,
+        }
+
+        strategy = make_strategy([profile])
+
+        assert strategy.entry_order == "trigger"
+
 
 class TestRestingRungBalance:
     def test_rungs_outgrowing_the_balance(self, make_strategy, caplog):

@@ -1,12 +1,12 @@
 [project]
 name = "robottraderslab-envelope"
-version = "0.1.1"
+version = "0.1.2"
 description = "Envelope trading strategy plugin for the RobotTradersLab engine"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 license = "Apache-2.0"
 dependencies = [
-  "robottraderslab>=0.2.1",
+  "robottraderslab>=0.4.0",
   "pandas>=3.0.0",
   "numpy>=2.4.2",
 ]
