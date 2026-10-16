@@ -90,6 +90,7 @@ class EnvelopeStrategy(ProfileStrategy[ProfileConfig]):
             profile.symbol: profile for profile in self.profiles
         }
         _validate_profiles(self.profiles)
+        _validate_entry_order(self.entry_order, self.account)
         if self.account.capabilities.reserves_margin_on_pending_orders:
             logger.info(
                 "The exchange reserves margin on pending orders; the envelope "
@@ -221,6 +222,20 @@ def _validate_profiles(profiles: Sequence[ProfileConfig]) -> None:
         raise StrategyCriticalError(
             f"Envelope strategy accepts one profile per symbol, "
             f"got several for: {', '.join(duplicated)}."
+        )
+
+
+def _validate_entry_order(
+    entry_order: Literal["trigger", "limit"], account: FuturesAccount
+) -> None:
+    if (
+        entry_order == "limit"
+        and not account.capabilities.modifies_resting_orders_in_place
+    ):
+        raise StrategyCriticalError(
+            'Envelope strategy rests limit rungs with entry_order = "limit" and '
+            "moves them every candle, and the venue of account "
+            f"{account.name!r} modifies no resting order in place."
         )
 
 

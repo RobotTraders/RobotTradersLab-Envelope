@@ -24,7 +24,6 @@ from robottraderslab.strategies import (
 )
 from robottraderslab.strategies.futures import (
     FuturesAccount,
-    FuturesMarketOrderAction,
     FuturesOrderBatchAction,
 )
 from robottraderslab_envelope import EnvelopeStrategy
@@ -100,15 +99,12 @@ def _entry_rungs(bookkeeper: BookKeeper, symbol: Symbol, side: OrderSide) -> lis
         for action in bookkeeper.list_actions()
         if isinstance(action, FuturesOrderBatchAction)
         for order in action.orders
-        if isinstance(order, FuturesMarketOrderAction)
-        and order.symbol == symbol
-        and order.side == side
-        and not order.reduce_only
+        if order.symbol == symbol and order.side == side and not order.reduce_only
     ]
 
 
 class _StrategyHarness:
-    def __init__(self, profiles: list[dict[str, Any]]) -> None:
+    def __init__(self, profiles: list[dict[str, Any]], entry_order: str) -> None:
         self.exchange = SimulatedFuturesExchange.create_from_settings(
             initial_balance={"USDT": 10_000.0},
             maker_fee_rate=0.0,
@@ -123,6 +119,7 @@ class _StrategyHarness:
             trading_system=TradingSystem(trading_mode=TradingMode.BACKTEST),
             config_dir=Path("bot-config-dir"),
             profiles=profiles,
+            entry_order=entry_order,
         )
 
     def setup(self) -> None:
@@ -154,8 +151,8 @@ class _StrategyHarness:
 
 
 @pytest.fixture
-def btc_harness() -> _StrategyHarness:
-    harness = _StrategyHarness([_make_profile(BTC)])
+def btc_harness(entry_order: str) -> _StrategyHarness:
+    harness = _StrategyHarness([_make_profile(BTC)], entry_order)
     harness.setup()
     return harness
 
@@ -203,8 +200,10 @@ class TestReentryLifecycleIntegration:
 
 
 class TestReentrySymbolIsolation:
-    def test_sl_on_btc_does_not_gate_eth(self):
-        harness = _StrategyHarness([_make_profile(BTC), _make_profile(ETH)])
+    def test_sl_on_btc_does_not_gate_eth(self, entry_order):
+        harness = _StrategyHarness(
+            [_make_profile(BTC), _make_profile(ETH)], entry_order
+        )
         harness.setup()
         harness.record_sl_fill(BTC, PositionSide.LONG, BAR_START + timedelta(hours=4))
         ohlcvs, last_timestamp = _build_ohlcvs(
