@@ -22,6 +22,7 @@ BAND_LABEL: dict[PositionSide, str] = {
     PositionSide.SHORT: "high",
 }
 _ENVELOPE_KEYS = ("envelopes", "long_envelopes", "short_envelopes")
+_WARM_UP_AND_GUARD_PERIODS = 2
 
 
 class AverageType(StrEnum):
@@ -71,6 +72,14 @@ class ProfileConfig(Profile):
             )
             for side, offsets in self.offsets_by_side.items()
         }
+
+    @cached_property
+    def lookback(self) -> int:
+        """The first period fills the average; the second gives every candle
+        after a stop-loss a set average, which the re-entry guard needs to
+        judge it.
+        """
+        return _WARM_UP_AND_GUARD_PERIODS * self.average_period
 
     @cached_property
     def offsets_by_side(self) -> dict[PositionSide, list[float]]:

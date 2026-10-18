@@ -2,6 +2,8 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 
+import numpy as np
+
 from robottraderslab import Symbol, TimeFrame
 from robottraderslab.strategies import Execution, OHLCVs, OrderSide, PositionSide
 
@@ -32,6 +34,11 @@ class ReentryGuard:
     A side is blocked when the most recent stop-loss fill on that side has not
     yet been followed by a close on the opposite side of the moving-average
     reference.
+
+    A stop-loss is judged only while every candle after it carries the
+    reference, so the verdict a cycle reaches holds on the next one, whose
+    window starts a candle later and leaves the reference of its first
+    candles unset.
     """
 
     def __init__(self) -> None:
@@ -62,6 +69,7 @@ class ReentryGuard:
             for fill in fills
             if fill.symbol == symbol
             and ohlcvs.covers(symbol, timeframe, fill.timestamp)
+            and _is_judged(ohlcvs, symbol, timeframe, reference_column, fill, timestamp)
         ]
         if not symbol_fills:
             return self._record_state(symbol, frozenset(), {}, timestamp)
@@ -105,6 +113,29 @@ class ReentryGuard:
         return ReentryState(blocked_sides=blocked)
 
 
+def _is_judged(
+    ohlcvs: OHLCVs,
+    symbol: Symbol,
+    timeframe: TimeFrame,
+    reference_column: str,
+    fill: Execution,
+    boundary: datetime,
+) -> bool:
+    since_fill = _since_fill(ohlcvs, symbol, timeframe, fill, boundary)
+    references = ohlcvs.column(symbol, timeframe, reference_column)[since_fill]
+    return not np.isnan(references).any()
+
+
+def _since_fill(
+    ohlcvs: OHLCVs,
+    symbol: Symbol,
+    timeframe: TimeFrame,
+    fill: Execution,
+    boundary: datetime,
+) -> slice:
+    return ohlcvs.candles_between(symbol, timeframe, boundary, after=fill.timestamp)
+
+
 def _closed_position_side(fill: Execution) -> PositionSide:
     """A reducing execution sells to close a long and buys to close a short."""
     return PositionSide.SHORT if fill.side == OrderSide.BUY else PositionSide.LONG
@@ -118,10 +149,7 @@ def _has_cleared(
     fill: Execution,
     boundary: datetime,
 ) -> bool:
-    """Report whether price closed back across the reference after the fill."""
-    since_fill = ohlcvs.candles_between(
-        symbol, timeframe, boundary, after=fill.timestamp
-    )
+    since_fill = _since_fill(ohlcvs, symbol, timeframe, fill, boundary)
     closes = ohlcvs.column(symbol, timeframe, "close")[since_fill]
     references = ohlcvs.column(symbol, timeframe, reference_column)[since_fill]
     if _closed_position_side(fill) == PositionSide.LONG:

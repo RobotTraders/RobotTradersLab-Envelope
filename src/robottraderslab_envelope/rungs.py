@@ -83,7 +83,7 @@ def wanted_while_holding(
     unfilled_count = sum(
         1
         for rung in profile_snapshot.pending_rungs
-        if entered_side(rung.side) is position.side
+        if rung.side is not None and entered_side(rung.side) is position.side
     )
     first_unfilled_band_index = len(bands) - unfilled_count
 

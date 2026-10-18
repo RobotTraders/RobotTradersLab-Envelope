@@ -5,7 +5,10 @@ import pandas as pd
 import pytest
 
 from robottraderslab import Symbol
+from robottraderslab.indicators import sma
 from robottraderslab.strategies import Execution, OHLCVs, OrderSide, PositionSide
+from robottraderslab.strategies.futures import TotalBalanceRatio
+from robottraderslab_envelope.profile_config import AverageType, ProfileConfig
 from robottraderslab_envelope.reentry_guard import ReentryGuard, ReentryState
 
 BTC = Symbol.create("BTC/USDT:USDT")
@@ -56,6 +59,18 @@ def _short_sl_fill(symbol: Symbol, timestamp: datetime) -> Execution:
         timestamp=timestamp,
         kind="stop-loss",
     )
+
+
+def _window(closes: list[float], first_bar: int, count: int, warm_up: int) -> OHLCVs:
+    """A rolling average is unset until its period is full, so the first
+    `warm_up` candles of the window a live cycle loads carry none.
+    """
+    bars = _bars(len(closes))[first_bar : first_bar + count]
+    frame = pd.DataFrame({"close": closes[first_bar : first_bar + count]}, index=bars)
+    references = [float("nan")] * warm_up + [100.0] * (count - warm_up)
+    ohlcvs = OHLCVs({TIMEFRAME: {BTC: frame}})
+    ohlcvs.add_column(BTC, TIMEFRAME, REFERENCE_COLUMN, references)
+    return ohlcvs
 
 
 class TestReentryState:
@@ -168,6 +183,47 @@ class TestReentryGuard:
 
         assert state.blocked_sides == frozenset({PositionSide.LONG})
 
+    def test_a_side_one_cycle_let_open_stays_open_on_the_next(self):
+        closes = [100.0, 99.0, 101.0, 99.0, 98.0, 97.0]
+        moments = _moments(len(closes))
+        fills = [_long_sl_fill(BTC, moments[1])]
+
+        first_cycle = ReentryGuard().state_for(
+            BTC,
+            TIMEFRAME,
+            REFERENCE_COLUMN,
+            _window(closes, first_bar=0, count=5, warm_up=2),
+            fills,
+            moments[4],
+        )
+        next_cycle = ReentryGuard().state_for(
+            BTC,
+            TIMEFRAME,
+            REFERENCE_COLUMN,
+            _window(closes, first_bar=1, count=5, warm_up=2),
+            fills,
+            moments[5],
+        )
+
+        assert first_cycle.blocked_sides == frozenset()
+        assert next_cycle.blocked_sides == frozenset()
+
+    def test_an_unset_reference_before_the_stop_loss_keeps_the_block(self, guard):
+        closes = [100.0, 99.0, 98.0, 99.0, 98.0, 97.0]
+        moments = _moments(len(closes))
+        fills = [_long_sl_fill(BTC, moments[1])]
+
+        state = guard.state_for(
+            BTC,
+            TIMEFRAME,
+            REFERENCE_COLUMN,
+            _window(closes, first_bar=0, count=5, warm_up=2),
+            fills,
+            moments[4],
+        )
+
+        assert state.blocked_sides == frozenset({PositionSide.LONG})
+
     def test_uses_most_recent_fill_per_side(self, guard):
         moments = _moments(5)
         ohlcvs = _ohlcvs(
@@ -261,3 +317,42 @@ class TestReentryGuard:
             guard.state_for(BTC, TIMEFRAME, REFERENCE_COLUMN, ohlcvs, [], moments[-1])
 
         assert len(caplog.records) == 0
+
+
+class TestGuardHorizon:
+    @pytest.fixture
+    def profile(self) -> ProfileConfig:
+        return ProfileConfig(
+            symbol=str(BTC),
+            timeframe=TIMEFRAME,
+            sizing=TotalBalanceRatio(1.0),
+            average_type=AverageType.SMA,
+            average_period=3,
+            stop_loss_pct=0.15,
+            envelopes=[0.05],
+        )
+
+    def test_a_stop_loss_holds_its_side_over_the_profile_lookback(self, profile):
+        period = profile.average_period
+        closes = [100.0] * profile.lookback + [90.0] * (period + 3)
+        stop_bar = profile.lookback
+        moments = _moments(len(closes))
+        fills = [_long_sl_fill(BTC, moments[stop_bar - 1] + timedelta(minutes=5))]
+
+        blocked_cycles = []
+        for newest in range(stop_bar, len(closes)):
+            first = newest - profile.lookback
+            window = closes[first : newest + 1]
+            frame = pd.DataFrame(
+                {"close": window}, index=_bars(len(closes))[first : newest + 1]
+            )
+            ohlcvs = OHLCVs({TIMEFRAME: {BTC: frame}})
+            ohlcvs.add_column(
+                BTC, TIMEFRAME, REFERENCE_COLUMN, sma(frame["close"].to_numpy(), period)
+            )
+            state = ReentryGuard().state_for(
+                BTC, TIMEFRAME, REFERENCE_COLUMN, ohlcvs, fills, moments[newest]
+            )
+            blocked_cycles.append(PositionSide.LONG in state.blocked_sides)
+
+        assert blocked_cycles == [True] * (period + 3)

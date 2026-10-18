@@ -99,9 +99,7 @@ class EnvelopeStrategy(ProfileStrategy[ProfileConfig]):
             )
         _warn_when_resting_rungs_outgrow_the_balance(self.profiles)
         for profile in self.profiles:
-            requirements.ohlcv.add(
-                profile.symbol, profile.timeframe, profile.average_period
-            )
+            requirements.ohlcv.add(profile.symbol, profile.timeframe, profile.lookback)
         requirements.account.add(
             self.account,
             symbols=[profile.symbol for profile in self.profiles],
