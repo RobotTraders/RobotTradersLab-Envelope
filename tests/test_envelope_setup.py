@@ -62,7 +62,7 @@ class TestSetup:
         assert len(registered) == 1
         assert registered[0].symbol == Symbol.create("BTC/USDT:USDT")
         assert registered[0].timeframe == "1d"
-        assert registered[0].lookback == 100
+        assert registered[0].lookback == 200
 
     def test_multiple_profiles_register_each_requirement(self, make_strategy):
         strategy = make_strategy(
