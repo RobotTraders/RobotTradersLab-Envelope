@@ -71,7 +71,7 @@ class EnvelopeStrategy(ProfileStrategy[ProfileConfig]):
     market_type: ClassVar[MarketType] = "futures"
 
     account: FuturesAccount
-    entry_order: Literal["trigger", "limit"] = "trigger"
+    entry_order: Literal["trigger", "limit"] = "limit"
     update_mode: Literal["modify", "cancel_replace"] = "modify"
 
     _entry_order: EntryOrder
@@ -231,9 +231,10 @@ def _validate_entry_order(
         and not account.capabilities.modifies_resting_orders_in_place
     ):
         raise StrategyCriticalError(
-            'Envelope strategy rests limit rungs with entry_order = "limit" and '
-            "moves them every candle, and the venue of account "
-            f"{account.name!r} modifies no resting order in place."
+            "Envelope strategy rests limit rungs and moves them every candle, "
+            f"and the venue of account {account.name!r} modifies no resting "
+            'order in place; set entry_order = "trigger" under [strategy] to '
+            "rest trigger rungs."
         )
 
 

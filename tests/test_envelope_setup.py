@@ -150,7 +150,7 @@ class TestSetup:
         with pytest.raises(StrategyCriticalError, match="'trigger' or 'limit'"):
             make_strategy([profile], entry_order="stop")
 
-    def test_rungs_rest_as_triggers_by_default(self, make_strategy):
+    def test_rungs_rest_as_limits_by_default(self, make_strategy):
         profile = {
             "symbol": "BTC/USDT:USDT",
             "timeframe": "1d",
@@ -163,7 +163,7 @@ class TestSetup:
 
         strategy = make_strategy([profile])
 
-        assert strategy.entry_order == "trigger"
+        assert strategy.entry_order == "limit"
 
 
 class TestRestingRungBalance:

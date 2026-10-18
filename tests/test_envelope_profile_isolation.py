@@ -14,7 +14,7 @@ from robottraderslab.strategies import (
     TradingMode,
 )
 from robottraderslab.strategies.futures import (
-    FuturesMarketOrderAction,
+    FuturesLimitOrderAction,
     FuturesOrderBatchAction,
     MarginMode,
     MarginSettings,
@@ -97,7 +97,7 @@ def _rung_orders_for(bookkeeper: BookKeeper, symbol: Symbol) -> list:
         for action in bookkeeper.list_actions()
         if isinstance(action, FuturesOrderBatchAction)
         for order in action.orders
-        if isinstance(order, FuturesMarketOrderAction) and order.symbol == symbol
+        if isinstance(order, FuturesLimitOrderAction) and order.symbol == symbol
     ]
 
 

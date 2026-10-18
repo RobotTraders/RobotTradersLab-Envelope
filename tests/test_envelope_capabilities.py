@@ -53,9 +53,9 @@ def test_limit_entry_stops_on_a_venue_that_modifies_no_resting_order_in_place(
     mock_exchange.capabilities = FuturesCapabilities(
         modifies_resting_orders_in_place=False
     )
-    strategy = make_strategy([_PROFILE], entry_order="limit")
+    strategy = make_strategy([_PROFILE])
 
-    with pytest.raises(StrategyCriticalError, match='entry_order = "limit"'):
+    with pytest.raises(StrategyCriticalError, match='entry_order = "trigger"'):
         asyncio.run(strategy.setup(StrategyRequirements()))
 
 
