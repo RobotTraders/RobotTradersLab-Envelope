@@ -246,6 +246,7 @@ def _config_text() -> str:
     return f"""\
 [strategy]
 strategy_class = "envelope"
+entry_order = "trigger"
 
 [[strategy.profiles]]
 symbol = "BTC/USDT:USDT"
