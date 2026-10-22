@@ -57,11 +57,13 @@ class ProfileConfig(Profile):
         """
         Raises:
             StrategyCriticalError: If a value is out of range, if `envelopes`
-                is combined with a directional list, or if no side has offsets.
+                is combined with a directional list, if no side has offsets, or
+                if a side's stop-loss can sit inside its own ladder.
         """
         self._validate_envelopes()
         self._validate_leverage()
         self._validate_stop_loss_pct()
+        self._validate_stop_loss_beyond_ladder()
 
     @cached_property
     def band_columns(self) -> dict[PositionSide, tuple[str, ...]]:
@@ -135,6 +137,20 @@ class ProfileConfig(Profile):
                 f"leverage must be greater than 0, got {self.leverage} on {self.symbol}"
             )
 
+    def _validate_stop_loss_beyond_ladder(self) -> None:
+        inside = [
+            f"{side.value} ladder {offsets}"
+            for side, offsets in self.offsets_by_side.items()
+            if offsets and not _stop_beyond_ladder(side, offsets, self.stop_loss_pct)
+        ]
+        if inside:
+            raise StrategyCriticalError(
+                f"stop_loss_pct {self.stop_loss_pct} on {self.symbol} can sit "
+                f"inside the {' and the '.join(inside)}: the stop-loss must lie "
+                f"beyond the outermost rung even when only the innermost has "
+                f"filled; raise stop_loss_pct or bring the offsets closer"
+            )
+
     def _validate_stop_loss_pct(self) -> None:
         if not 0 < self.stop_loss_pct < 1:
             raise StrategyCriticalError(
@@ -202,3 +218,12 @@ def envelopes_by_side(settings: Mapping[str, Any]) -> dict[PositionSide, list[fl
             "envelopes cannot be combined with long_envelopes or short_envelopes"
         )
     return {PositionSide.LONG: both_sides, PositionSide.SHORT: both_sides}
+
+
+def _stop_beyond_ladder(
+    side: PositionSide, offsets: list[float], stop_loss_pct: float
+) -> bool:
+    innermost, outermost = min(offsets), max(offsets)
+    if side is PositionSide.LONG:
+        return (1 - innermost) * (1 - stop_loss_pct) < 1 - outermost
+    return (1 + stop_loss_pct) * (1 - outermost) > 1 - innermost

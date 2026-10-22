@@ -20,7 +20,7 @@ def _sized_profile(
         "average_type": "SMA",
         "average_period": 100,
         "envelopes": [0.05, 0.10],
-        "stop_loss_pct": 0.04,
+        "stop_loss_pct": 0.30,
         "total_balance_ratio": total_balance_ratio,
         "leverage": leverage,
     }
@@ -48,7 +48,7 @@ class TestSetup:
                     "average_type": "SMA",
                     "average_period": 100,
                     "envelopes": [0.05, 0.10, 0.15],
-                    "stop_loss_pct": 0.04,
+                    "stop_loss_pct": 0.30,
                 }
             ]
         )
@@ -74,7 +74,7 @@ class TestSetup:
                     "average_type": "SMA",
                     "average_period": 100,
                     "envelopes": [0.05],
-                    "stop_loss_pct": 0.04,
+                    "stop_loss_pct": 0.30,
                 },
                 {
                     "symbol": "ETH/USDT:USDT",
@@ -83,7 +83,7 @@ class TestSetup:
                     "average_type": "EMA",
                     "average_period": 50,
                     "envelopes": [0.03, 0.06],
-                    "stop_loss_pct": 0.02,
+                    "stop_loss_pct": 0.30,
                 },
             ]
         )
@@ -104,7 +104,7 @@ class TestSetup:
                     "average_type": "SMA",
                     "average_period": 100,
                     "envelopes": [0.05],
-                    "stop_loss_pct": 0.04,
+                    "stop_loss_pct": 0.30,
                 },
                 {
                     "symbol": "BTC/USDT:USDT",
@@ -113,7 +113,7 @@ class TestSetup:
                     "average_type": "EMA",
                     "average_period": 50,
                     "envelopes": [0.03],
-                    "stop_loss_pct": 0.02,
+                    "stop_loss_pct": 0.30,
                 },
             ]
         )
@@ -130,7 +130,7 @@ class TestSetup:
             "average_type": "SMA",
             "average_period": 100,
             "envelopes": [0.05],
-            "stop_loss_pct": 0.04,
+            "stop_loss_pct": 0.30,
         }
 
         with pytest.raises(StrategyCriticalError, match="update_mode"):
@@ -144,7 +144,7 @@ class TestSetup:
             "average_type": "SMA",
             "average_period": 100,
             "envelopes": [0.05],
-            "stop_loss_pct": 0.04,
+            "stop_loss_pct": 0.30,
         }
 
         with pytest.raises(StrategyCriticalError, match="'trigger' or 'limit'"):
@@ -158,7 +158,7 @@ class TestSetup:
             "average_type": "SMA",
             "average_period": 100,
             "envelopes": [0.05],
-            "stop_loss_pct": 0.04,
+            "stop_loss_pct": 0.30,
         }
 
         strategy = make_strategy([profile])

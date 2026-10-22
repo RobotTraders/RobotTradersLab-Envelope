@@ -129,6 +129,71 @@ class TestStopLossPctValidation:
             ProfileConfig(**_kwargs(envelopes=[0.05], stop_loss_pct=stop_loss_pct))
 
 
+class TestStopLossBeyondLadder:
+    def test_stop_inside_both_ladders_rejected(self):
+        with pytest.raises(
+            StrategyCriticalError,
+            match=r"stop_loss_pct 0\.001 .*long ladder .* and the short ladder",
+        ):
+            ProfileConfig(
+                **_kwargs(envelopes=[0.0005, 0.001, 0.002], stop_loss_pct=0.001)
+            )
+
+    def test_stop_inside_the_long_ladder_names_the_long_side(self):
+        with pytest.raises(
+            StrategyCriticalError, match=r"inside the long ladder \[0\.05, 0\.3\]:"
+        ):
+            ProfileConfig(
+                **_kwargs(
+                    long_envelopes=[0.05, 0.30],
+                    short_envelopes=[0.05, 0.10],
+                    stop_loss_pct=0.1,
+                )
+            )
+
+    def test_stop_inside_the_short_ladder_names_the_short_side(self):
+        with pytest.raises(
+            StrategyCriticalError, match=r"inside the short ladder \[0\.05, 0\.3\]:"
+        ):
+            ProfileConfig(
+                **_kwargs(
+                    long_envelopes=[0.05, 0.10],
+                    short_envelopes=[0.05, 0.30],
+                    stop_loss_pct=0.1,
+                )
+            )
+
+    def test_stop_beyond_the_ladder_accepted(self):
+        profile = ProfileConfig(
+            **_kwargs(envelopes=[0.0005, 0.001, 0.002], stop_loss_pct=0.004)
+        )
+
+        assert profile.offsets_by_side[LONG] == [0.0005, 0.001, 0.002]
+
+    @pytest.mark.parametrize(
+        ("side_key", "offsets"),
+        [("long_envelopes", [0.5, 0.75]), ("short_envelopes", [0.25, 0.5])],
+    )
+    def test_stop_on_the_outermost_rung_rejected(self, side_key, offsets):
+        with pytest.raises(StrategyCriticalError, match="can sit inside"):
+            ProfileConfig(**_kwargs(**{side_key: offsets}, stop_loss_pct=0.5))
+
+    def test_stop_beyond_a_one_sided_ladder_accepted(self):
+        profile = ProfileConfig(
+            **_kwargs(short_envelopes=[0.05, 0.10], stop_loss_pct=0.30)
+        )
+
+        assert profile.offsets_by_side[SHORT] == [0.05, 0.10]
+
+    @pytest.mark.parametrize("stop_loss_pct", [0.0001, 0.5, 0.99])
+    def test_single_rung_passes_whatever_the_stop(self, stop_loss_pct):
+        profile = ProfileConfig(
+            **_kwargs(envelopes=[0.05], stop_loss_pct=stop_loss_pct)
+        )
+
+        assert profile.offsets_by_side[SHORT] == [0.05]
+
+
 class TestEnvelopeForms:
     def test_envelopes_applies_to_both_sides(self):
         profile = ProfileConfig(**_kwargs(envelopes=[0.05, 0.10]))

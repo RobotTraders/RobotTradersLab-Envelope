@@ -270,6 +270,31 @@ class TestReentryGuard:
 
         assert state.blocked_sides == frozenset()
 
+    def test_locks_a_side_stopped_after_the_last_close(self, guard):
+        moments = _moments(3)
+        ohlcvs = _ohlcvs([100.0, 101.0, 102.0], [100.0, 100.0, 100.0])
+        stopped_at = (moments[-1] + timedelta(seconds=1)).tz_localize("UTC")
+        fills = [_long_sl_fill(BTC, stopped_at.to_pydatetime())]
+
+        state = guard.state_for(
+            BTC, TIMEFRAME, REFERENCE_COLUMN, ohlcvs, fills, moments[-1]
+        )
+
+        assert state.blocked_sides == frozenset({PositionSide.LONG})
+
+    def test_a_close_back_across_the_reference_clears_a_stop_filled_after_the_last_close(
+        self, guard
+    ):
+        moments = _moments(5)
+        ohlcvs = _ohlcvs([100.0, 99.0, 98.0, 99.0, 101.0], [100.0] * 5)
+        fills = [_long_sl_fill(BTC, moments[2].to_pydatetime() + timedelta(seconds=1))]
+
+        state = guard.state_for(
+            BTC, TIMEFRAME, REFERENCE_COLUMN, ohlcvs, fills, moments[4]
+        )
+
+        assert state.blocked_sides == frozenset()
+
     def test_reads_the_candles_of_the_latest_store(self, guard):
         moments = _moments(3)
         stale = _ohlcvs([100.0, 99.0, 98.0], [100.0, 100.0, 100.0])

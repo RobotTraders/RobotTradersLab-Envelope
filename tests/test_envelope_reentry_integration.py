@@ -124,6 +124,8 @@ class _StrategyHarness:
 
     def setup(self) -> None:
         asyncio.run(self.strategy.setup(self.requirements))
+        requirement = self.requirements.account._get_all()[0]
+        asyncio.run(self.account._read_instruments(requirement.symbols))
 
     def account_state(self, since: datetime) -> AccountSnapshots:
         requirement = self.requirements.account._get_all()[0]
