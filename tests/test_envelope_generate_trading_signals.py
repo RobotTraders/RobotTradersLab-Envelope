@@ -49,7 +49,7 @@ def _profile(
         "average_type": average_type,
         "average_period": average_period,
         "envelopes": envelopes if envelopes is not None else [0.05, 0.10],
-        "stop_loss_pct": 0.04,
+        "stop_loss_pct": 0.30,
     }
 
 

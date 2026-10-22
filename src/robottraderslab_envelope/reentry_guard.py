@@ -60,7 +60,10 @@ class ReentryGuard:
                 must clear before it may be entered again.
             ohlcvs: Candles covering the window the fills fall in.
             fills: Stop-loss fills covering at least the loaded window; fills
-                for other symbols or before the window are ignored.
+                for other symbols or before the window are ignored. A fill
+                stamped after `timestamp` is a stop-loss the venue filled
+                once that candle had closed; it blocks its side until a
+                later close clears it.
             timestamp: The moment the current candle closed. Candles closing
                 after it are ignored.
         """
@@ -68,7 +71,7 @@ class ReentryGuard:
             fill
             for fill in fills
             if fill.symbol == symbol
-            and ohlcvs.covers(symbol, timeframe, fill.timestamp)
+            and _is_in_window(ohlcvs, symbol, timeframe, fill.timestamp)
             and _is_judged(ohlcvs, symbol, timeframe, reference_column, fill, timestamp)
         ]
         if not symbol_fills:
@@ -111,6 +114,19 @@ class ReentryGuard:
             )
         self._last_blocked[symbol] = blocked
         return ReentryState(blocked_sides=blocked)
+
+
+def _is_in_window(
+    ohlcvs: OHLCVs, symbol: Symbol, timeframe: TimeFrame, moment: datetime
+) -> bool:
+    """A stop-loss filled after the last loaded close has no candle following it,
+    and the guard still counts it.
+    """
+    if ohlcvs.covers(symbol, timeframe, moment):
+        return True
+    candle_count = len(ohlcvs.column(symbol, timeframe, "close"))
+    closed_by_moment = ohlcvs.candles_between(symbol, timeframe, moment).stop
+    return int(closed_by_moment) == candle_count
 
 
 def _is_judged(

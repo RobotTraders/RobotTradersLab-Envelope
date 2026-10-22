@@ -125,7 +125,7 @@ def _directional_profile(**envelope_keys: object) -> dict[str, object]:
 PROFILE_LONG_ONLY = _directional_profile(long_envelopes=[0.05])
 PROFILE_SHORT_ONLY = _directional_profile(short_envelopes=[0.05])
 PROFILE_UNEQUAL_SIDES = _directional_profile(
-    long_envelopes=[0.05, 0.10, 0.15], short_envelopes=[0.05]
+    long_envelopes=[0.05, 0.10, 0.15], short_envelopes=[0.05], stop_loss_pct=0.30
 )
 
 
@@ -772,9 +772,10 @@ def _open_short_position(
 PROFILE_THREE_RUNGS = {
     **PROFILE,
     "envelopes": [0.05, 0.10, 0.15],
+    "stop_loss_pct": 0.30,
 }
 PROFILE_THREE_SHORT_ONE_LONG = _directional_profile(
-    long_envelopes=[0.05], short_envelopes=[0.05, 0.10, 0.15]
+    long_envelopes=[0.05], short_envelopes=[0.05, 0.10, 0.15], stop_loss_pct=0.30
 )
 
 
