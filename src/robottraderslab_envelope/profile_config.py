@@ -5,7 +5,7 @@ from functools import cached_property
 from typing import Any
 
 from robottraderslab import Symbol
-from robottraderslab.exceptions import StrategyCriticalError
+from robottraderslab.exceptions import BotCriticalError
 from robottraderslab.strategies import (
     AccountSnapshot,
     PositionSide,
@@ -56,7 +56,7 @@ class ProfileConfig(Profile):
     def __post_init__(self) -> None:
         """
         Raises:
-            StrategyCriticalError: If a value is out of range, if `envelopes`
+            BotCriticalError: If a value is out of range, if `envelopes`
                 is combined with a directional list, if no side has offsets, or
                 if a side's stop-loss can sit inside its own ladder.
         """
@@ -121,19 +121,19 @@ class ProfileConfig(Profile):
 
     def _validate_envelopes(self) -> None:
         if not any(self.offsets_by_side.values()):
-            raise StrategyCriticalError(
+            raise BotCriticalError(
                 "profile must declare envelopes, long_envelopes or short_envelopes"
             )
         for side, offsets in self.offsets_by_side.items():
             if not all(0 < offset < 1 for offset in offsets):
-                raise StrategyCriticalError(
+                raise BotCriticalError(
                     f"envelope offsets must be in (0, 1), got {offsets} on the "
                     f"{side.value} side"
                 )
 
     def _validate_leverage(self) -> None:
         if self.leverage <= 0:
-            raise StrategyCriticalError(
+            raise BotCriticalError(
                 f"leverage must be greater than 0, got {self.leverage} on {self.symbol}"
             )
 
@@ -144,7 +144,7 @@ class ProfileConfig(Profile):
             if offsets and not _stop_beyond_ladder(side, offsets, self.stop_loss_pct)
         ]
         if inside:
-            raise StrategyCriticalError(
+            raise BotCriticalError(
                 f"stop_loss_pct {self.stop_loss_pct} on {self.symbol} can sit "
                 f"inside the {' and the '.join(inside)}: the stop-loss must lie "
                 f"beyond the outermost rung even when only the innermost has "
@@ -153,7 +153,7 @@ class ProfileConfig(Profile):
 
     def _validate_stop_loss_pct(self) -> None:
         if not 0 < self.stop_loss_pct < 1:
-            raise StrategyCriticalError(
+            raise BotCriticalError(
                 f"stop_loss_pct must be in (0, 1), got {self.stop_loss_pct} on "
                 f"{self.symbol}"
             )
@@ -199,12 +199,12 @@ def envelopes_by_side(settings: Mapping[str, Any]) -> dict[PositionSide, list[fl
     at least one offset, so an emptied list is a mistake and not a silent opt-out.
 
     Raises:
-        StrategyCriticalError: If `envelopes` is combined with `long_envelopes`
+        BotCriticalError: If `envelopes` is combined with `long_envelopes`
             or `short_envelopes`, or if a written key holds an empty list.
     """
     for key in _ENVELOPE_KEYS:
         if key in settings and not settings[key]:
-            raise StrategyCriticalError(f"{key} must be a non-empty list")
+            raise BotCriticalError(f"{key} must be a non-empty list")
     both_sides = settings.get("envelopes")
     long_offsets = settings.get("long_envelopes")
     short_offsets = settings.get("short_envelopes")
@@ -214,7 +214,7 @@ def envelopes_by_side(settings: Mapping[str, Any]) -> dict[PositionSide, list[fl
             PositionSide.SHORT: short_offsets or [],
         }
     if long_offsets is not None or short_offsets is not None:
-        raise StrategyCriticalError(
+        raise BotCriticalError(
             "envelopes cannot be combined with long_envelopes or short_envelopes"
         )
     return {PositionSide.LONG: both_sides, PositionSide.SHORT: both_sides}

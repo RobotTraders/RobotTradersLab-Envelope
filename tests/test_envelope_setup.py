@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from robottraderslab import Symbol
-from robottraderslab.exceptions import StrategyCriticalError
+from robottraderslab.exceptions import BotCriticalError
 from robottraderslab.strategies import StrategyRequirements
 from robottraderslab_envelope import EnvelopeStrategy
 
@@ -119,7 +119,7 @@ class TestSetup:
         )
         requirements = StrategyRequirements()
 
-        with pytest.raises(StrategyCriticalError, match="BTC/USDT:USDT"):
+        with pytest.raises(BotCriticalError, match="BTC/USDT:USDT"):
             asyncio.run(strategy.setup(requirements))
 
     def test_unknown_update_mode(self, make_strategy):
@@ -133,7 +133,7 @@ class TestSetup:
             "stop_loss_pct": 0.30,
         }
 
-        with pytest.raises(StrategyCriticalError, match="update_mode"):
+        with pytest.raises(BotCriticalError, match="update_mode"):
             make_strategy([profile], update_mode="amend")
 
     def test_unknown_entry_order(self, make_strategy):
@@ -147,7 +147,7 @@ class TestSetup:
             "stop_loss_pct": 0.30,
         }
 
-        with pytest.raises(StrategyCriticalError, match="'trigger' or 'limit'"):
+        with pytest.raises(BotCriticalError, match="'trigger' or 'limit'"):
             make_strategy([profile], entry_order="stop")
 
     def test_rungs_rest_as_limits_by_default(self, make_strategy):
