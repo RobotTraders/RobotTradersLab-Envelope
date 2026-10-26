@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import ClassVar, Literal
 
 from robottraderslab import Symbol
-from robottraderslab.exceptions import StrategyCriticalError
+from robottraderslab.exceptions import BotCriticalError
 from robottraderslab.strategies import (
     AccountSnapshots,
     BookKeeper,
@@ -217,7 +217,7 @@ def _validate_profiles(profiles: Sequence[ProfileConfig]) -> None:
     counts = Counter(profile.symbol for profile in profiles)
     duplicated = sorted(str(symbol) for symbol, count in counts.items() if count > 1)
     if duplicated:
-        raise StrategyCriticalError(
+        raise BotCriticalError(
             f"Envelope strategy accepts one profile per symbol, "
             f"got several for: {', '.join(duplicated)}."
         )
@@ -230,7 +230,7 @@ def _validate_entry_order(
         entry_order == "limit"
         and not account.capabilities.modifies_resting_orders_in_place
     ):
-        raise StrategyCriticalError(
+        raise BotCriticalError(
             "Envelope strategy rests limit rungs and moves them every candle, "
             f"and the venue of account {account.name!r} modifies no resting "
             'order in place; set entry_order = "trigger" under [strategy] to '

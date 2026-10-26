@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from robottraderslab.exceptions import StrategyCriticalError
+from robottraderslab.exceptions import BotCriticalError
 from robottraderslab.strategies import PositionSide
 from robottraderslab.strategies.futures import (
     MarginMode,
@@ -64,13 +64,11 @@ class TestBuiltFromASection:
         assert profile.average_type is AverageType.DCM
 
     def test_unknown_margin_mode_rejected(self, make_strategy):
-        with pytest.raises(StrategyCriticalError, match="margin_mode: Input should be"):
+        with pytest.raises(BotCriticalError, match="margin_mode: Input should be"):
             make_strategy([_section(margin_mode="nonsense")])
 
     def test_unknown_average_type_rejected(self, make_strategy):
-        with pytest.raises(
-            StrategyCriticalError, match="average_type: Input should be"
-        ):
+        with pytest.raises(BotCriticalError, match="average_type: Input should be"):
             make_strategy([_section(average_type="DCA")])
 
 
@@ -107,16 +105,14 @@ class TestEnvelopesValidation:
         "offsets", [[0.0, 0.1], [-0.05, 0.1], [0.1, 1.0], [0.1, 1.2]]
     )
     def test_offset_outside_the_unit_interval_rejected(self, offsets):
-        with pytest.raises(StrategyCriticalError, match="must be in"):
+        with pytest.raises(BotCriticalError, match="must be in"):
             ProfileConfig(**_kwargs(long_envelopes=offsets, short_envelopes=[0.1]))
 
 
 class TestLeverageValidation:
     @pytest.mark.parametrize("leverage", [0.0, -1.0])
     def test_not_above_zero_rejected(self, leverage):
-        with pytest.raises(
-            StrategyCriticalError, match=rf"leverage.*{re.escape(SYMBOL)}"
-        ):
+        with pytest.raises(BotCriticalError, match=rf"leverage.*{re.escape(SYMBOL)}"):
             ProfileConfig(**_kwargs(envelopes=[0.05], leverage=leverage))
 
 
@@ -124,7 +120,7 @@ class TestStopLossPctValidation:
     @pytest.mark.parametrize("stop_loss_pct", [0.0, -0.1, 1.0, 1.5])
     def test_outside_the_unit_interval_rejected(self, stop_loss_pct):
         with pytest.raises(
-            StrategyCriticalError, match=rf"stop_loss_pct.*{re.escape(SYMBOL)}"
+            BotCriticalError, match=rf"stop_loss_pct.*{re.escape(SYMBOL)}"
         ):
             ProfileConfig(**_kwargs(envelopes=[0.05], stop_loss_pct=stop_loss_pct))
 
@@ -132,7 +128,7 @@ class TestStopLossPctValidation:
 class TestStopLossBeyondLadder:
     def test_stop_inside_both_ladders_rejected(self):
         with pytest.raises(
-            StrategyCriticalError,
+            BotCriticalError,
             match=r"stop_loss_pct 0\.001 .*long ladder .* and the short ladder",
         ):
             ProfileConfig(
@@ -141,7 +137,7 @@ class TestStopLossBeyondLadder:
 
     def test_stop_inside_the_long_ladder_names_the_long_side(self):
         with pytest.raises(
-            StrategyCriticalError, match=r"inside the long ladder \[0\.05, 0\.3\]:"
+            BotCriticalError, match=r"inside the long ladder \[0\.05, 0\.3\]:"
         ):
             ProfileConfig(
                 **_kwargs(
@@ -153,7 +149,7 @@ class TestStopLossBeyondLadder:
 
     def test_stop_inside_the_short_ladder_names_the_short_side(self):
         with pytest.raises(
-            StrategyCriticalError, match=r"inside the short ladder \[0\.05, 0\.3\]:"
+            BotCriticalError, match=r"inside the short ladder \[0\.05, 0\.3\]:"
         ):
             ProfileConfig(
                 **_kwargs(
@@ -175,7 +171,7 @@ class TestStopLossBeyondLadder:
         [("long_envelopes", [0.5, 0.75]), ("short_envelopes", [0.25, 0.5])],
     )
     def test_stop_on_the_outermost_rung_rejected(self, side_key, offsets):
-        with pytest.raises(StrategyCriticalError, match="can sit inside"):
+        with pytest.raises(BotCriticalError, match="can sit inside"):
             ProfileConfig(**_kwargs(**{side_key: offsets}, stop_loss_pct=0.5))
 
     def test_stop_beyond_a_one_sided_ladder_accepted(self):
@@ -221,20 +217,20 @@ class TestEnvelopeForms:
         "directional", [{"long_envelopes": [0.05]}, {"short_envelopes": [0.05]}]
     )
     def test_envelopes_with_a_directional_list_rejected(self, directional):
-        with pytest.raises(StrategyCriticalError, match="cannot be combined"):
+        with pytest.raises(BotCriticalError, match="cannot be combined"):
             ProfileConfig(**_kwargs(envelopes=[0.05], **directional))
 
     def test_no_form_declared_rejected(self):
-        with pytest.raises(StrategyCriticalError, match="must declare"):
+        with pytest.raises(BotCriticalError, match="must declare"):
             ProfileConfig(**_kwargs())
 
     @pytest.mark.parametrize("key", ["envelopes", "long_envelopes", "short_envelopes"])
     def test_a_written_key_with_an_empty_list_rejected(self, key):
-        with pytest.raises(StrategyCriticalError, match=f"{key} must be a non-empty"):
+        with pytest.raises(BotCriticalError, match=f"{key} must be a non-empty"):
             ProfileConfig(**_kwargs(**{key: []}))
 
     def test_offset_out_of_range_rejected(self):
-        with pytest.raises(StrategyCriticalError, match="must be in"):
+        with pytest.raises(BotCriticalError, match="must be in"):
             ProfileConfig(**_kwargs(long_envelopes=[1.2]))
 
 

@@ -244,6 +244,8 @@ class TestWindowFigures:
 
 def _config_text() -> str:
     return f"""\
+name = "test-bot"
+
 [strategy]
 strategy_class = "envelope"
 entry_order = "trigger"

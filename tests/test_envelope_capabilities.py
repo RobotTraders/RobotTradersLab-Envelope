@@ -3,7 +3,7 @@ import logging
 
 import pytest
 
-from robottraderslab.exceptions import StrategyCriticalError
+from robottraderslab.exceptions import BotCriticalError
 from robottraderslab.strategies import StrategyRequirements
 from robottraderslab.strategies.futures import FuturesCapabilities
 
@@ -55,7 +55,7 @@ def test_limit_entry_stops_on_a_venue_that_modifies_no_resting_order_in_place(
     )
     strategy = make_strategy([_PROFILE])
 
-    with pytest.raises(StrategyCriticalError, match='entry_order = "trigger"'):
+    with pytest.raises(BotCriticalError, match='entry_order = "trigger"'):
         asyncio.run(strategy.setup(StrategyRequirements()))
 
 
