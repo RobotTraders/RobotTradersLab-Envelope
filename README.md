@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This repository is archived. The Envelope strategy is now developed in the [`plugins/robottraderslab-envelope`](https://github.com/RobotTraders/RobotTradersLab/tree/main/plugins/robottraderslab-envelope) folder of [RobotTraders/RobotTradersLab](https://github.com/RobotTraders/RobotTradersLab), and released from there.
+
 # robottraderslab-envelope
 
 Mean reversion strategy plugin for the RobotTradersLab engine, registered under the name `envelope`.
